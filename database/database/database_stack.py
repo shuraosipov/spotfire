@@ -18,6 +18,7 @@ class DatabaseStack(cdk.Stack):
         )
         
         cluster = rds.DatabaseCluster(self, "Database",
+            removal_policy=cdk.RemovalPolicy.DESTROY,
             engine=rds.DatabaseClusterEngine.aurora_postgres(version=rds.AuroraPostgresEngineVersion.VER_12_4),
             credentials=rds.Credentials.from_secret(rds_admin_secret),
             instance_props={
@@ -26,7 +27,6 @@ class DatabaseStack(cdk.Stack):
                 "instance_type": ec2.InstanceType("t3.medium"),
                 "vpc_subnets": {
                     "subnet_type": ec2.SubnetType.PUBLIC
-                    # "subnet_group_name": "private-db-subnet-group"
                 },
                 "vpc": vpc
             }
