@@ -1,0 +1,30 @@
+version: 0.2
+
+env:
+  secrets-manager:
+    DB_HOST: "rds_admin:host"
+    DBADMIN_NAME: "rds_admin:username"
+    DBADMIN_PASSWORD: "rds_admin:password"
+    SERVERDB_NAME: "rds_admin:spotfire_db"
+    SERVERDB_USER: "rds_admin:spotfire_db_user"
+    SERVERDB_PASSWORD: "rds_admin:spotfire_db_password"
+
+phases:
+  pre_build:
+    commands:
+      - echo List environment variables
+      - printenv 
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...          
+      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG      
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - docker run --env DB_HOST=$DB_HOST --env DBADMIN_NAME=$DBADMIN_NAME --env DBADMIN_PASSWORD=$DBADMIN_PASSWORD --env SERVERDB_NAME=$SERVERDB_NAME --env SERVERDB_USER=$SERVERDB_USER --env SERVERDB_PASSWORD=$SERVERDB_PASSWORD $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG 
