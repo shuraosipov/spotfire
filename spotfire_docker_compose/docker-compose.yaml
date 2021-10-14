@@ -1,0 +1,39 @@
+version: '3.7'
+services:
+    postgres:
+        image: postgres:10.5
+        restart: always
+        environment:
+          - POSTGRES_DB=spotfire
+          - POSTGRES_USER=spotfire
+          - POSTGRES_PASSWORD=spotfire
+        logging:
+          options:
+            max-size: 10m
+            max-file: "3"
+        ports:
+          - '5438:5432'
+        volumes:
+          - ./postgres-data:/var/lib/postgresql/data
+          # copy the sql script to create tables
+          - ./sql/create_server_db.sql:/docker-entrypoint-initdb.d/create_server_db.sql
+          # copy the sql script to fill tables
+          - ./sql/populate_server_db.sql:/docker-entrypoint-initdb.d/populate_server_db.sql
+    spotfire_server:
+        build: .
+        ports:
+          - "82:80"
+        depends_on:
+          - postgres
+        restart: always
+        tty: true
+        environment:
+          - DB_DRIVER=org.postgresql.Driver
+          - DB_URL=jdbc:postgresql://postgres:5432/spotfire
+          - DB_USER=spotfire
+          - DB_PASSWORD=spotfire
+          - CONFIG_TOOL_PASSWORD=spotfire
+          - ADMIN_USER=spotfire-admin
+          - ADMIN_PASSWORD=spotfire-admin-password
+          - DEPLOY_TERR=false
+          - SET_AUTO_TRUST=true
