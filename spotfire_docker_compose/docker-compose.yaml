@@ -33,7 +33,7 @@ services:
           - DB_USER=spotfire
           - DB_PASSWORD=spotfire
           - CONFIG_TOOL_PASSWORD=spotfire
-          - ADMIN_USER=spotfire-admin
-          - ADMIN_PASSWORD=spotfire-admin-password
+          - ADMIN_USER=admin
+          - ADMIN_PASSWORD=spotfire
           - DEPLOY_TERR=false
           - SET_AUTO_TRUST=true
